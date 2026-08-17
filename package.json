@@ -1,0 +1,9 @@
+{
+  "name": "wedding-planner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A budget-first, private wedding planning MVP.",
+  "scripts": {
+    "check": "node --check app.js"
+  }
+}

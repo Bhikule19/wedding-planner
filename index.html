@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f0e7" />
+    <title>Vaibhav — Wedding Planning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#budget" aria-label="Vaibhav wedding planning home">
+          <span class="brand-mark">V</span>
+          <span><strong>Vaibhav</strong><small>wedding planning</small></span>
+        </a>
+
+        <nav aria-label="Primary navigation">
+          <p class="nav-label">Planning</p>
+          <a class="nav-link active" href="#budget" data-view="budget"><span>01</span> Budget overview</a>
+          <a class="nav-link" href="#decisions" data-view="decisions"><span>02</span> Decision inbox <b id="decision-badge">4</b></a>
+          <a class="nav-link" href="#events" data-view="events"><span>03</span> Event plan</a>
+          <p class="nav-label secondary">Library</p>
+          <a class="nav-link muted" href="#items" data-view="items"><span>04</span> Planning items</a>
+          <a class="nav-link muted" href="#notes" data-view="notes"><span>05</span> Notes &amp; ideas</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="date-block"><span>COUNTDOWN</span><strong>112 days</strong><small>18 December 2026</small></div>
+          <button class="text-button" id="reset-data">Reset demo data</button>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div class="crumb"><span id="view-kicker">MASTER PLAN</span><span class="dot">•</span><span>August 2026</span></div>
+          <button class="add-button" id="open-add-modal"><span>+</span> Add planning item</button>
+        </header>
+
+        <section class="view active" id="budget-view" aria-labelledby="budget-title">
+          <div class="page-intro">
+            <div><p class="eyebrow">The spending picture</p><h1 id="budget-title">Budget, <em>before</em> the promises.</h1></div>
+            <p class="intro-copy">Forecasts are not commitments. This view keeps the two separate, so you can plan with clarity before booking anything.</p>
+          </div>
+
+          <section class="budget-hero" aria-label="Overall wedding budget">
+            <div class="hero-total"><span class="label">Allocated wedding budget</span><strong id="budget-total">₹12.00L</strong><span class="subtle">Across 9 planned categories</span></div>
+            <div class="hero-stat forecast"><span>Current forecast</span><strong id="forecast-total">₹8.76L</strong><small id="forecast-detail">73% of allocation</small></div>
+            <div class="hero-stat committed"><span>Explicitly committed</span><strong id="committed-total">₹2.65L</strong><small id="committed-detail">22% of allocation</small></div>
+            <div class="hero-stat paid"><span>Actually paid</span><strong id="paid-total">₹65k</strong><small>Only confirmed transactions</small></div>
+          </section>
+
+          <section class="attention-strip" id="attention-strip">
+            <div class="signal">!</div>
+            <div><strong>₹1.25L of likely cost is still undecided.</strong><span id="attention-text">Reception decor and photography need a choice before committing.</span></div>
+            <button class="underlined-button" data-go="decisions">Review decisions <span>→</span></button>
+          </section>
+
+          <div class="section-heading"><div><p class="eyebrow">Category health</p><h2>Where the plan stands</h2></div><button class="icon-button" aria-label="Filter categories">⌘</button></div>
+          <section class="category-grid" id="category-grid" aria-label="Budget category breakdown"></section>
+
+          <section class="lower-grid">
+            <div class="panel budget-panel">
+              <div class="panel-heading"><div><p class="eyebrow">Cost exposure</p><h2>Largest uncertain costs</h2></div><span class="panel-note">needs input</span></div>
+              <div id="uncertainty-list" class="uncertainty-list"></div>
+            </div>
+            <div class="panel reserve-panel">
+              <p class="eyebrow">Protect the plan</p><h2>Keep a reserve.</h2>
+              <div class="reserve-figure"><strong id="reserve-total">₹1.20L</strong><span>contingency</span></div>
+              <p>10% is ring-fenced for changes, missed costs, and the inevitable last-minute request.</p>
+              <div class="reserve-bar"><span></span></div>
+              <small>Do not use this to make an over-budget choice look affordable.</small>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="decisions-view" aria-labelledby="decisions-title">
+          <div class="page-intro decision-intro"><div><p class="eyebrow">Decision inbox</p><h1 id="decisions-title">Choose deliberately,<br /><em>then</em> commit.</h1></div><p class="intro-copy">Each decision shows the real cost implication. Nothing here becomes a booking until you explicitly confirm it.</p></div>
+          <div class="decision-toolbar"><div class="filter-tabs"><button class="selected" data-filter="open">Open <span id="open-count">4</span></button><button data-filter="shortlisted">Shortlisted</button><button data-filter="all">All</button></div><button class="text-button">Sort: deadline ↓</button></div>
+          <div class="decision-list" id="decision-list"></div>
+        </section>
+
+        <section class="view" id="events-view" aria-labelledby="events-title">
+          <div class="page-intro"><div><p class="eyebrow">Event plan</p><h1 id="events-title">One wedding,<br /><em>many</em> moving parts.</h1></div><p class="intro-copy">Use events to see what is linked together. Shared costs stay visible as shared—no fake duplication across functions.</p></div>
+          <section class="event-grid" id="event-grid"></section>
+        </section>
+
+        <section class="view" id="items-view" aria-labelledby="items-title">
+          <div class="page-intro"><div><p class="eyebrow">Research library</p><h1 id="items-title">Everything still<br /><em>in play.</em></h1></div><p class="intro-copy">Candidates remain options until selected. Keep research, quotations, and ideas in one honest pipeline.</p></div>
+          <div class="item-table-wrap"><table><thead><tr><th>Planning need</th><th>Event</th><th>Stage</th><th>Best current cost</th><th>Next action</th></tr></thead><tbody id="item-table"></tbody></table></div>
+        </section>
+
+        <section class="view empty-view" id="notes-view" aria-labelledby="notes-title"><p class="eyebrow">Notes &amp; ideas</p><h1 id="notes-title">A place for the<br /><em>not-yet.</em></h1><p>Capture loose ideas here, then turn one into a planning item when it deserves research.</p><button class="add-button" id="open-idea-modal"><span>+</span> Capture an idea</button></section>
+      </main>
+    </div>
+
+    <dialog id="item-modal">
+      <form method="dialog" id="item-form">
+        <div class="modal-heading"><div><p class="eyebrow">New planning item</p><h2>Put it in the plan.</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>What needs a decision?<input name="name" required placeholder="e.g. Reception photo booth" /></label>
+        <div class="form-grid"><label>Type<select name="type"><option>Vendor</option><option>Shopping</option><option>Add-on</option><option>Idea</option></select></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option>Shared</option></select></label></div>
+        <div class="form-grid"><label>Budget allocation<input name="budget" required type="number" min="0" placeholder="50000" /></label><label>Current estimate<input name="forecast" type="number" min="0" placeholder="45000" /></label></div>
+        <label>Next action<input name="action" required placeholder="Research three options" /></label>
+        <button class="add-button submit-button" value="default">Add to planning inbox <span>→</span></button>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
