@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
-import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, signInWithRedirect, signOut } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import { doc, getDoc, getFirestore, setDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { firebaseConfig, allowedEmail, planDocumentId } from './firebase-config.js';
 
@@ -38,7 +38,7 @@ const defaultState = {
     { name: 'Reception', date: '18 Dec 2026', budget: 245000, forecast: 287000, decisions: 2, items: 6 }
   ]
 };
-let state = JSON.parse(localStorage.getItem('vaibhav-wedding-plan')) || structuredClone(defaultState);
+let state = JSON.parse(localStorage.getItem('wedding-plan')) || structuredClone(defaultState);
 let activeFilter = 'open';
 let auth = null;
 let db = null;
@@ -49,7 +49,7 @@ const authButton = document.querySelector('#auth-button');
 function syncLabel(kind, label) { authButton.className = `sync-status ${kind}`; authButton.innerHTML = `<span></span>${label}`; }
 function updateSyncUi() { if (!firebaseConfig) syncLabel('offline', 'Set up sync'); else if (saving) syncLabel('saving', 'Saving…'); else if (user) syncLabel('online', 'Synced · sign out'); else syncLabel('offline', 'Sign in to sync'); }
 function save() {
-  localStorage.setItem('vaibhav-wedding-plan', JSON.stringify(state));
+  localStorage.setItem('wedding-plan', JSON.stringify(state));
   if (!db || !user) return;
   saving = true;
   updateSyncUi();
@@ -95,14 +95,19 @@ function toast(message) { const el = document.querySelector('#toast'); el.textCo
 async function connectCloud() {
   if (!firebaseConfig) { toast('Add your Firebase config in firebase-config.js first.'); return; }
   if (user) { await signOut(auth); return; }
-  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-  catch { syncLabel('error', 'Sign-in failed'); toast('Google sign-in was cancelled or blocked.'); }
+  syncLabel('saving', 'Redirecting to Google…');
+  try { await signInWithRedirect(auth, new GoogleAuthProvider()); }
+  catch (error) { syncLabel('error', 'Sign-in failed'); toast(`Sign-in failed: ${error.code || 'unknown error'}`); }
 }
 function initializeCloud() {
   if (!firebaseConfig) { updateSyncUi(); return; }
   const app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+  getRedirectResult(auth).catch(error => {
+    syncLabel('error', 'Sign-in failed');
+    toast(`Sign-in failed: ${error.code || 'unknown error'}`);
+  });
   onAuthStateChanged(auth, async signedInUser => {
     user = signedInUser;
     if (user && allowedEmail !== 'YOUR_GOOGLE_EMAIL@example.com' && user.email !== allowedEmail) {
@@ -115,7 +120,7 @@ function initializeCloud() {
         const snapshot = await getDoc(doc(db, 'weddings', planDocumentId));
         if (snapshot.exists()) {
           state = snapshot.data();
-          localStorage.setItem('vaibhav-wedding-plan', JSON.stringify(state));
+          localStorage.setItem('wedding-plan', JSON.stringify(state));
           render();
           toast('Wedding plan loaded from Firestore.');
         } else {
