@@ -1,3 +1,8 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import { doc, getDoc, getFirestore, setDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
+import { firebaseConfig, allowedEmail, planDocumentId } from './firebase-config.js';
+
 const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
 const compact = (number) => number >= 100000 ? `₹${(number / 100000).toFixed(number % 100000 ? 2 : 0)}L` : number >= 1000 ? `₹${Math.round(number / 1000)}k` : currency.format(number);
 const defaultState = {
@@ -35,8 +40,23 @@ const defaultState = {
 };
 let state = JSON.parse(localStorage.getItem('vaibhav-wedding-plan')) || structuredClone(defaultState);
 let activeFilter = 'open';
+let auth = null;
+let db = null;
+let user = null;
+let saving = false;
+const authButton = document.querySelector('#auth-button');
 
-function save() { localStorage.setItem('vaibhav-wedding-plan', JSON.stringify(state)); }
+function syncLabel(kind, label) { authButton.className = `sync-status ${kind}`; authButton.innerHTML = `<span></span>${label}`; }
+function updateSyncUi() { if (!firebaseConfig) syncLabel('offline', 'Set up sync'); else if (saving) syncLabel('saving', 'Saving…'); else if (user) syncLabel('online', 'Synced · sign out'); else syncLabel('offline', 'Sign in to sync'); }
+function save() {
+  localStorage.setItem('vaibhav-wedding-plan', JSON.stringify(state));
+  if (!db || !user) return;
+  saving = true;
+  updateSyncUi();
+  setDoc(doc(db, 'weddings', planDocumentId), { ...state, updatedAt: new Date().toISOString(), owner: user.email })
+    .catch(() => { syncLabel('error', 'Sync failed'); toast('Could not sync. Your browser copy is still saved.'); })
+    .finally(() => { saving = false; updateSyncUi(); });
+}
 function totals() { return state.categories.reduce((acc, c) => { acc.budget += c.budget; acc.forecast += c.forecast; acc.committed += c.committed; acc.paid += c.paid; return acc; }, { budget: 0, forecast: 0, committed: 0, paid: 0 }); }
 function renderBudget() {
   const total = totals();
@@ -72,6 +92,42 @@ function renderItems() { document.querySelector('#item-table').innerHTML = state
 function render() { renderBudget(); renderDecisions(); renderEvents(); renderItems(); }
 function showView(view) { document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === `${view}-view`)); document.querySelectorAll('.nav-link').forEach(el => el.classList.toggle('active', el.dataset.view === view)); document.querySelector('#view-kicker').textContent = view === 'budget' ? 'MASTER PLAN' : view.toUpperCase(); }
 function toast(message) { const el = document.querySelector('#toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
+async function connectCloud() {
+  if (!firebaseConfig) { toast('Add your Firebase config in firebase-config.js first.'); return; }
+  if (user) { await signOut(auth); return; }
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch { syncLabel('error', 'Sign-in failed'); toast('Google sign-in was cancelled or blocked.'); }
+}
+function initializeCloud() {
+  if (!firebaseConfig) { updateSyncUi(); return; }
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  onAuthStateChanged(auth, async signedInUser => {
+    user = signedInUser;
+    if (user && allowedEmail !== 'YOUR_GOOGLE_EMAIL@example.com' && user.email !== allowedEmail) {
+      toast(`This plan is restricted to ${allowedEmail}.`);
+      await signOut(auth);
+      return;
+    }
+    if (user) {
+      try {
+        const snapshot = await getDoc(doc(db, 'weddings', planDocumentId));
+        if (snapshot.exists()) {
+          state = snapshot.data();
+          localStorage.setItem('vaibhav-wedding-plan', JSON.stringify(state));
+          render();
+          toast('Wedding plan loaded from Firestore.');
+        } else {
+          save();
+          toast('Your first shared wedding plan is ready.');
+        }
+      } catch { syncLabel('error', 'Sync unavailable'); toast('Firestore could not be reached.'); }
+    }
+    updateSyncUi();
+  });
+  updateSyncUi();
+}
 document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', () => showView(link.dataset.view)));
 document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => { showView(button.dataset.go); location.hash = button.dataset.go; }));
 document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(tab => tab.classList.toggle('selected', tab === button)); renderDecisions(); }));
@@ -81,5 +137,7 @@ document.querySelector('#open-add-modal').addEventListener('click', () => modal.
 document.querySelector('#open-idea-modal').addEventListener('click', () => { modal.querySelector('[name=name]').placeholder = 'e.g. Floral entrance reference'; modal.showModal(); });
 document.querySelector('#item-form').addEventListener('submit', event => { event.preventDefault(); const form = new FormData(event.target); const item = { name: form.get('name'), type: form.get('type'), event: form.get('event'), stage: 'Researching', forecast: Number(form.get('forecast')) || 0, action: form.get('action') }; state.items.unshift(item); const category = { name: item.name, budget: Number(form.get('budget')), forecast: item.forecast, committed: 0, paid: 0, event: item.event }; state.categories.splice(-1, 0, category); state.decisions.unshift({ id: Date.now(), title: `Decide on ${item.name}`, category: item.name, event: item.event, deadline: 'No deadline set', urgent: false, estimate: item.forecast, status: 'open', candidates: ['Research first option', 'Research second option'] }); save(); render(); event.target.reset(); modal.close(); toast(`${item.name} added as an open planning decision.`); });
 document.querySelector('#reset-data').addEventListener('click', () => { if (!confirm('Reset all locally saved planning data to the original demo?')) return; state = structuredClone(defaultState); save(); render(); toast('Demo data restored.'); });
+authButton.addEventListener('click', connectCloud);
 window.addEventListener('hashchange', () => { const view = location.hash.slice(1); if (['budget','decisions','events','items','notes'].includes(view)) showView(view); });
 render();
+initializeCloud();

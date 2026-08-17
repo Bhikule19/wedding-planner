@@ -10,7 +10,7 @@ A private, budget-first wedding planning tool for the decision-making stage. It 
 - Event plan for Haldi, Sangeet, Wedding, and Reception
 - Planning-library view for vendors, shopping, and add-ons
 - Add a planning item; it appears in the budget, library, and decision inbox
-- Browser `localStorage` persistence; no account, database, or server required
+- Browser-local persistence, with optional Firestore sync across browsers
 
 ## Run locally
 
@@ -22,9 +22,21 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
+## Firebase sync setup
+
+For automatic cross-browser consistency, configure the included Firestore integration:
+
+1. Create a Firebase project and register a Web app.
+2. Enable **Authentication → Google** and create **Cloud Firestore** in production mode.
+3. Paste the Web app configuration object into `firebase-config.js` and replace `allowedEmail` with your Google email.
+4. Replace the same placeholder email in `firestore.rules`, then publish those rules in the Firebase console.
+5. In Firebase Authentication settings, add your deployed domain to Authorized domains.
+
+The Google sign-in is deliberate. A client-only Firestore app with no authentication would require public rules, meaning anyone who discovers the app could read or overwrite your wedding data. This setup permits only your Google account. The current data is text-only and stored in a single Firestore document; photos and attachments require Firebase Storage in a later phase.
+
 ## Hosting
 
-The project can be hosted privately on a static host (GitHub Pages, Cloudflare Pages, Netlify, or Vercel). Be aware that browser-local data stays in each browser; it is not shared or backed up. A later internal-use version should add authentication and a database before relying on it for real wedding data.
+The project can be hosted as a static site (GitHub Pages, Cloudflare Pages, Netlify, or Vercel). Until Firebase is configured, it continues to work locally in the browser. Once configured, edits sync after Google sign-in.
 
 ## GitHub setup
 
