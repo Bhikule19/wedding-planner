@@ -2,26 +2,49 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/fireba
 import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, signInWithRedirect, signOut } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import { doc, getDoc, getFirestore, setDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { firebaseConfig, allowedEmail, planDocumentId } from './firebase-config.js';
-
-const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
-const compact = (number) => number >= 100000 ? `₹${(number / 100000).toFixed(number % 100000 ? 2 : 0)}L` : number >= 1000 ? `₹${Math.round(number / 1000)}k` : currency.format(number);
+import { compact } from './format.js';
+import { createVendors, VENDOR_SEED } from './vendors.js';
+import { createPayments, PAYMENT_SEED } from './payments.js';
+import { createShopping, SHOPPING_SEED } from './shopping.js';
+import { createAddons, ADDON_SEED } from './addons.js';
+import { createTasks, TASK_SEED } from './tasks.js';
+import { createEvents } from './events.js';
+import { createDecisions, normalizeDecision, isUndecided } from './decisions.js';
+import { createGuests, GUEST_SEED } from './guests.js';
 const defaultState = {
   categories: [
     { name: 'Venue & catering', budget: 360000, forecast: 310000, committed: 165000, paid: 45000, event: 'Shared' },
     { name: 'Photography', budget: 150000, forecast: 115000, committed: 0, paid: 0, event: 'Shared' },
     { name: 'Decor & flowers', budget: 140000, forecast: 160000, committed: 0, paid: 0, event: 'Reception' },
-    { name: 'Outfits & jewellery', budget: 155000, forecast: 118000, committed: 60000, paid: 20000, event: 'Shared' },
+    { name: 'Outfits & jewellery', budget: 155000, forecast: 118000, committed: 66500, paid: 20000, event: 'Shared' },
     { name: 'Makeup & mehendi', budget: 70000, forecast: 56000, committed: 40000, paid: 0, event: 'Wedding' },
     { name: 'Music & entertainment', budget: 85000, forecast: 47000, committed: 0, paid: 0, event: 'Sangeet' },
     { name: 'Invitations & gifts', budget: 60000, forecast: 42000, committed: 0, paid: 0, event: 'Shared' },
     { name: 'Transport & stay', budget: 60000, forecast: 28000, committed: 0, paid: 0, event: 'Shared' },
+    { name: 'Add-ons & experiences', budget: 90000, forecast: 55000, committed: 0, paid: 0, event: 'Shared' },
     { name: 'Reserve / contingency', budget: 120000, forecast: 0, committed: 0, paid: 0, event: 'Shared', reserve: true }
   ],
   decisions: [
-    { id: 1, title: 'Choose a photography team', category: 'Photography', event: 'Shared', deadline: 'By 28 Aug', urgent: true, estimate: 115000, status: 'open', candidates: ['Studio A · ₹1.05L', 'Studio B · ₹1.15L', 'Studio C · ₹1.28L'] },
-    { id: 2, title: 'Set reception decor direction', category: 'Decor & flowers', event: 'Reception', deadline: 'By 31 Aug', urgent: true, estimate: 160000, status: 'shortlisted', candidates: ['Floral minimal · ₹1.35L', 'Citrus canopy · ₹1.60L', 'Stage-led · ₹1.85L'] },
-    { id: 3, title: 'Decide on a live food counter', category: 'Music & entertainment', event: 'Sangeet', deadline: 'By 05 Sep', urgent: false, estimate: 22000, status: 'open', candidates: ['Paan counter · ₹15k', 'Chaat counter · ₹22k', 'Skip it · ₹0'] },
-    { id: 4, title: 'Shortlist the reception outfit', category: 'Outfits & jewellery', event: 'Reception', deadline: 'By 08 Sep', urgent: false, estimate: 58000, status: 'open', candidates: ['Black bandhgala · ₹48k', 'Ivory tuxedo · ₹58k', 'Navy suit · ₹39k'] }
+    { id: 1, title: 'Choose a photography team', category: 'Photography', event: 'Shared', deadline: '2026-08-28', estimate: 128000, status: 'Open', finalChoice: '', decisionReason: '', decisionDate: '', notes: '', options: [
+      { label: 'Studio A', price: 105000, score: 8.5, pros: 'Best price, candid style', cons: 'Album basic' },
+      { label: 'Studio B', price: 115000, score: 7.8, pros: 'Strong traditional', cons: 'Slower delivery' },
+      { label: 'Studio C', price: 128000, score: 9.1, pros: 'Premium album', cons: 'Over budget' }
+    ] },
+    { id: 2, title: 'Set reception decor direction', category: 'Decor & flowers', event: 'Reception', deadline: '2026-08-31', estimate: 185000, status: 'Shortlisted', finalChoice: '', decisionReason: '', decisionDate: '', notes: '', options: [
+      { label: 'Floral minimal', price: 135000, score: 7.5, pros: 'Elegant, on budget', cons: '' },
+      { label: 'Citrus canopy', price: 160000, score: 8, pros: 'Distinctive', cons: '' },
+      { label: 'Stage-led', price: 185000, score: 8.4, pros: 'High impact', cons: 'Expensive' }
+    ] },
+    { id: 3, title: 'Decide on a live food counter', category: 'Add-ons & experiences', event: 'Sangeet', deadline: '2026-09-05', estimate: 22000, status: 'Open', finalChoice: '', decisionReason: '', decisionDate: '', notes: '', options: [
+      { label: 'Paan counter', price: 15000, score: 0, pros: '', cons: '' },
+      { label: 'Chaat counter', price: 22000, score: 0, pros: '', cons: '' },
+      { label: 'Skip it', price: 0, score: 0, pros: 'Save money', cons: '' }
+    ] },
+    { id: 4, title: 'Shortlist the reception outfit', category: 'Outfits & jewellery', event: 'Reception', deadline: '2026-09-08', estimate: 58000, status: 'Open', finalChoice: '', decisionReason: '', decisionDate: '', notes: '', options: [
+      { label: 'Black bandhgala', price: 48000, score: 0, pros: '', cons: '' },
+      { label: 'Ivory tuxedo', price: 58000, score: 0, pros: '', cons: '' },
+      { label: 'Navy suit', price: 39000, score: 0, pros: '', cons: '' }
+    ] }
   ],
   items: [
     { name: 'Photography team', type: 'Vendor', event: 'Shared', stage: 'Shortlisted', forecast: 115000, action: 'Compare final quotations' },
@@ -32,14 +55,26 @@ const defaultState = {
     { name: 'Invitation suite', type: 'Shopping', event: 'Shared', stage: 'Researching', forecast: 26000, action: 'Request paper samples' }
   ],
   events: [
-    { name: 'Haldi', date: '15 Dec 2026', budget: 65000, forecast: 51000, decisions: 0, items: 3 },
-    { name: 'Sangeet', date: '16 Dec 2026', budget: 165000, forecast: 139000, decisions: 1, items: 5 },
-    { name: 'Wedding', date: '17 Dec 2026', budget: 525000, forecast: 439000, decisions: 0, items: 7 },
-    { name: 'Reception', date: '18 Dec 2026', budget: 245000, forecast: 287000, decisions: 2, items: 6 }
-  ]
+    { name: 'Haldi', date: '15 Dec 2026', startTime: '10:00', endTime: '13:00', venue: 'Home lawn', guestCount: 80, budget: 65000, forecast: 51000, notes: '' },
+    { name: 'Sangeet', date: '16 Dec 2026', startTime: '19:00', endTime: '23:00', venue: 'Grand Ballroom', guestCount: 250, budget: 165000, forecast: 139000, notes: '' },
+    { name: 'Wedding', date: '17 Dec 2026', startTime: '20:00', endTime: '23:30', venue: 'Riverside Lawns', guestCount: 400, budget: 525000, forecast: 439000, notes: '' },
+    { name: 'Reception', date: '18 Dec 2026', startTime: '19:30', endTime: '23:30', venue: 'Grand Ballroom', guestCount: 450, budget: 245000, forecast: 287000, notes: '' }
+  ],
+  vendors: VENDOR_SEED,
+  payments: PAYMENT_SEED,
+  shopping: SHOPPING_SEED,
+  addons: ADDON_SEED,
+  tasks: TASK_SEED,
+  guests: GUEST_SEED
 };
 let state = JSON.parse(localStorage.getItem('wedding-plan')) || structuredClone(defaultState);
-let activeFilter = 'open';
+if (!state.vendors) state.vendors = structuredClone(VENDOR_SEED);
+if (!state.payments) state.payments = structuredClone(PAYMENT_SEED);
+if (!state.shopping) state.shopping = structuredClone(SHOPPING_SEED);
+if (!state.addons) state.addons = structuredClone(ADDON_SEED);
+if (!state.tasks) state.tasks = structuredClone(TASK_SEED);
+if (Array.isArray(state.decisions)) state.decisions = state.decisions.map(normalizeDecision);
+if (!state.guests) state.guests = structuredClone(GUEST_SEED);
 let auth = null;
 let db = null;
 let user = null;
@@ -66,6 +101,7 @@ function renderBudget() {
   document.querySelector('#paid-total').textContent = compact(total.paid);
   document.querySelector('#forecast-detail').textContent = `${Math.round(total.forecast / total.budget * 100)}% of allocation`;
   document.querySelector('#committed-detail').textContent = `${Math.round(total.committed / total.budget * 100)}% of allocation`;
+  document.querySelector('#category-count-label').textContent = `Across ${state.categories.length} planned categories`;
   const grid = document.querySelector('#category-grid');
   grid.innerHTML = state.categories.filter(c => !c.reserve).map(category => {
     const ratio = Math.min(category.forecast / category.budget * 100, 100);
@@ -73,23 +109,25 @@ function renderBudget() {
     const isCommitted = category.committed > 0;
     return `<article class="category-card"><div class="category-top"><span class="category-name">${category.name}</span><span class="state">${over ? 'over forecast' : isCommitted ? 'part committed' : 'planning'}</span></div><div class="category-value">${compact(category.forecast)}</div><div class="category-meta"><span>of ${compact(category.budget)} allocated</span><span>${over ? `+${compact(category.forecast - category.budget)}` : `${Math.round(ratio)}%`}</span></div><div class="progress ${!over ? 'safe' : ''}"><span style="width:${ratio}%"></span></div></article>`;
   }).join('');
-  const uncertain = state.decisions.filter(d => d.status !== 'decided').sort((a,b) => b.estimate - a.estimate).slice(0, 3);
-  document.querySelector('#uncertainty-list').innerHTML = uncertain.map((item, index) => `<div class="uncertainty-row"><div><strong>${item.title}</strong><small>${item.event} · ${item.candidates.length} options in play</small></div><div class="range">up to ${compact(item.estimate)}</div><div class="range-bar"><span style="width:${[92, 74, 46][index]}%"></span></div></div>`).join('');
+  const undecided = state.decisions.filter(isUndecided);
+  const uncertain = [...undecided].sort((a,b) => b.estimate - a.estimate).slice(0, 3);
+  document.querySelector('#uncertainty-list').innerHTML = uncertain.length ? uncertain.map((item, index) => `<div class="uncertainty-row"><div><strong>${item.title}</strong><small>${item.event} · ${item.options.length} options in play</small></div><div class="range">up to ${compact(item.estimate)}</div><div class="range-bar"><span style="width:${[92, 74, 46][index]}%"></span></div></div>`).join('') : '<p class="no-results">No open decisions—everything is decided.</p>';
+  const undecidedTotal = undecided.reduce((sum, d) => sum + (d.estimate || 0), 0);
+  const attention = document.querySelector('#attention-strip strong');
+  const attentionText = document.querySelector('#attention-text');
+  if (undecided.length) {
+    attention.textContent = `${compact(undecidedTotal)} of likely cost is still undecided.`;
+    attentionText.textContent = `${undecided.slice(0, 2).map(d => d.title.replace(/^(Choose|Set|Decide on|Shortlist)( a| the| an)? /i, '')).join(' and ')} need a choice before committing.`;
+  } else {
+    attention.textContent = 'Every decision is made.';
+    attentionText.textContent = 'Nothing is waiting on a choice right now.';
+  }
   const reserve = state.categories.find(c => c.reserve);
   document.querySelector('#reserve-total').textContent = compact(reserve.budget);
 }
-function renderDecisions() {
-  const list = state.decisions.filter(d => activeFilter === 'all' || d.status === activeFilter || (activeFilter === 'open' && d.status === 'open'));
-  const openCount = state.decisions.filter(d => d.status === 'open').length;
-  document.querySelector('#decision-badge').textContent = openCount;
-  document.querySelector('#open-count').textContent = openCount;
-  document.querySelector('#decision-list').innerHTML = list.length ? list.map((d, i) => `<article class="decision-card"><div class="decision-number">0${i + 1}</div><div><div class="decision-title">${d.title}</div><div class="decision-context">${d.event} · ${d.category} · ${d.status === 'shortlisted' ? 'options shortlisted' : 'research still open'}</div><div class="candidate-pills">${d.candidates.map(c => `<span class="candidate-pill">${c}</span>`).join('')}</div></div><div class="decision-right"><div class="deadline ${d.urgent ? 'urgent' : ''}">${d.deadline}</div><div class="decision-cost">${compact(d.estimate)} forecast</div><button class="choose-button" data-decide="${d.id}">Make a choice →</button></div></article>`).join('') : '<p class="no-results">Nothing in this view.</p>';
-}
-function renderEvents() {
-  document.querySelector('#event-grid').innerHTML = state.events.map((event, i) => `<article class="event-card" data-index="0${i + 1}"><h2>${event.name}</h2><div class="event-date">${event.date}</div><div class="event-numbers"><div><span>Allocated</span><strong>${compact(event.budget)}</strong></div><div><span>Forecast</span><strong>${compact(event.forecast)}</strong></div></div><div class="event-open"><b>${event.decisions} open decision${event.decisions === 1 ? '' : 's'}</b> · ${event.items} linked planning items</div></article>`).join('');
-}
 function renderItems() { document.querySelector('#item-table').innerHTML = state.items.map(item => `<tr><td>${item.name}<br><small>${item.type}</small></td><td>${item.event}</td><td><span class="stage">${item.stage}</span></td><td>${compact(item.forecast || 0)}</td><td>${item.action}</td></tr>`).join(''); }
-function render() { renderBudget(); renderDecisions(); renderEvents(); renderItems(); }
+function render() { renderBudget(); renderItems(); decisionsModule.render(); vendorsModule.render(); paymentsModule.render(); shoppingModule.render(); addonsModule.render(); tasksModule.render(); eventsModule.render(); guestsModule.render(); }
+function setState(next) { state = next; save(); render(); }
 function showView(view) { document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === `${view}-view`)); document.querySelectorAll('.nav-link').forEach(el => el.classList.toggle('active', el.dataset.view === view)); document.querySelector('#view-kicker').textContent = view === 'budget' ? 'MASTER PLAN' : view.toUpperCase(); }
 function toast(message) { const el = document.querySelector('#toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
 async function connectCloud() {
@@ -135,14 +173,20 @@ function initializeCloud() {
 }
 document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', () => showView(link.dataset.view)));
 document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => { showView(button.dataset.go); location.hash = button.dataset.go; }));
-document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(tab => tab.classList.toggle('selected', tab === button)); renderDecisions(); }));
-document.querySelector('#decision-list').addEventListener('click', event => { const id = Number(event.target.dataset.decide); if (!id) return; const decision = state.decisions.find(d => d.id === id); decision.status = 'decided'; const matching = state.items.find(item => item.name.toLowerCase().includes(decision.title.replace('Choose a ', '').replace('Set ', '').replace('Decide on a ', '').replace('Shortlist the ', '').split(' ')[0].toLowerCase())); if (matching) matching.stage = 'Decided'; save(); render(); toast(`“${decision.title}” marked decided. It is still not a booking.`); });
 const modal = document.querySelector('#item-modal');
 document.querySelector('#open-add-modal').addEventListener('click', () => modal.showModal());
 document.querySelector('#open-idea-modal').addEventListener('click', () => { modal.querySelector('[name=name]').placeholder = 'e.g. Floral entrance reference'; modal.showModal(); });
 document.querySelector('#item-form').addEventListener('submit', event => { event.preventDefault(); const form = new FormData(event.target); const item = { name: form.get('name'), type: form.get('type'), event: form.get('event'), stage: 'Researching', forecast: Number(form.get('forecast')) || 0, action: form.get('action') }; state.items.unshift(item); const category = { name: item.name, budget: Number(form.get('budget')), forecast: item.forecast, committed: 0, paid: 0, event: item.event }; state.categories.splice(-1, 0, category); state.decisions.unshift({ id: Date.now(), title: `Decide on ${item.name}`, category: item.name, event: item.event, deadline: 'No deadline set', urgent: false, estimate: item.forecast, status: 'open', candidates: ['Research first option', 'Research second option'] }); save(); render(); event.target.reset(); modal.close(); toast(`${item.name} added as an open planning decision.`); });
 document.querySelector('#reset-data').addEventListener('click', () => { if (!confirm('Reset all locally saved planning data to the original demo?')) return; state = structuredClone(defaultState); save(); render(); toast('Demo data restored.'); });
 authButton.addEventListener('click', connectCloud);
-window.addEventListener('hashchange', () => { const view = location.hash.slice(1); if (['budget','decisions','events','items','notes'].includes(view)) showView(view); });
+window.addEventListener('hashchange', () => { const view = location.hash.slice(1); if (['budget','decisions','vendors','shopping','addons','tasks','payments','events','guests','items','notes'].includes(view)) showView(view); });
+const vendorsModule = createVendors({ getState: () => state, setState, render, toast });
+const paymentsModule = createPayments({ getState: () => state, setState, render, toast });
+const shoppingModule = createShopping({ getState: () => state, setState, render, toast });
+const addonsModule = createAddons({ getState: () => state, setState, render, toast });
+const tasksModule = createTasks({ getState: () => state, setState, render, toast });
+const eventsModule = createEvents({ getState: () => state, setState, render, toast });
+const decisionsModule = createDecisions({ getState: () => state, setState, render, toast });
+const guestsModule = createGuests({ getState: () => state, setState, render, toast });
 render();
 initializeCloud();

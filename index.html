@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5f0e7" />
-    <title>Vaibhav — Wedding Planning</title>
+    <title>Wedding Planning</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,17 +15,25 @@
       <aside class="sidebar">
         <a class="brand" href="#budget" aria-label="Vaibhav wedding planning home">
           <span class="brand-mark">V</span>
-          <span><strong>Vaibhav</strong><small>wedding planning</small></span>
+          <span><strong>Abhishek-Sanika</strong><small>wedding planning</small></span>
         </a>
 
         <nav aria-label="Primary navigation">
           <p class="nav-label">Planning</p>
           <a class="nav-link active" href="#budget" data-view="budget"><span>01</span> Budget overview</a>
           <a class="nav-link" href="#decisions" data-view="decisions"><span>02</span> Decision inbox <b id="decision-badge">4</b></a>
-          <a class="nav-link" href="#events" data-view="events"><span>03</span> Event plan</a>
+          <a class="nav-link" href="#vendors" data-view="vendors"><span>03</span> Vendors</a>
+          <a class="nav-link" href="#shopping" data-view="shopping"><span>04</span> Shopping</a>
+          <a class="nav-link" href="#addons" data-view="addons"><span>05</span> Add-ons</a>
+          <p class="nav-label secondary">Operations</p>
+          <a class="nav-link" href="#tasks" data-view="tasks"><span>06</span> Tasks</a>
+          <a class="nav-link" href="#events" data-view="events"><span>07</span> Event plan</a>
+          <a class="nav-link" href="#guests" data-view="guests"><span>08</span> Guests</a>
+          <p class="nav-label secondary">Finance</p>
+          <a class="nav-link" href="#payments" data-view="payments"><span>09</span> Payments</a>
           <p class="nav-label secondary">Library</p>
-          <a class="nav-link muted" href="#items" data-view="items"><span>04</span> Planning items</a>
-          <a class="nav-link muted" href="#notes" data-view="notes"><span>05</span> Notes &amp; ideas</a>
+          <a class="nav-link muted" href="#items" data-view="items"><span>10</span> Planning items</a>
+          <a class="nav-link muted" href="#notes" data-view="notes"><span>11</span> Notes &amp; ideas</a>
         </nav>
 
         <div class="sidebar-footer">
@@ -47,7 +55,7 @@
           </div>
 
           <section class="budget-hero" aria-label="Overall wedding budget">
-            <div class="hero-total"><span class="label">Allocated wedding budget</span><strong id="budget-total">₹12.00L</strong><span class="subtle">Across 9 planned categories</span></div>
+            <div class="hero-total"><span class="label">Allocated wedding budget</span><strong id="budget-total">₹12.00L</strong><span class="subtle" id="category-count-label">Across 9 planned categories</span></div>
             <div class="hero-stat forecast"><span>Current forecast</span><strong id="forecast-total">₹8.76L</strong><small id="forecast-detail">73% of allocation</small></div>
             <div class="hero-stat committed"><span>Explicitly committed</span><strong id="committed-total">₹2.65L</strong><small id="committed-detail">22% of allocation</small></div>
             <div class="hero-stat paid"><span>Actually paid</span><strong id="paid-total">₹65k</strong><small>Only confirmed transactions</small></div>
@@ -79,13 +87,55 @@
 
         <section class="view" id="decisions-view" aria-labelledby="decisions-title">
           <div class="page-intro decision-intro"><div><p class="eyebrow">Decision inbox</p><h1 id="decisions-title">Choose deliberately,<br /><em>then</em> commit.</h1></div><p class="intro-copy">Each decision shows the real cost implication. Nothing here becomes a booking until you explicitly confirm it.</p></div>
-          <div class="decision-toolbar"><div class="filter-tabs"><button class="selected" data-filter="open">Open <span id="open-count">4</span></button><button data-filter="shortlisted">Shortlisted</button><button data-filter="all">All</button></div><button class="text-button">Sort: deadline ↓</button></div>
+          <div class="decision-toolbar"><div class="filter-tabs" id="decision-filter-tabs"></div><button class="add-button" id="open-add-decision"><span>+</span> Add decision</button></div>
           <div class="decision-list" id="decision-list"></div>
+        </section>
+
+        <section class="view" id="vendors-view" aria-labelledby="vendors-title">
+          <div class="page-intro"><div><p class="eyebrow">Vendor candidates</p><h1 id="vendors-title">Compare first,<br /><em>commit</em> once.</h1></div><p class="intro-copy">Every option stays a candidate until you select it. Selecting adds the agreed amount to the committed budget—nothing here is a payment.</p></div>
+          <div class="decision-toolbar"><div class="filter-tabs" id="vendor-filter-tabs"></div><button class="add-button" id="open-add-vendor"><span>+</span> Add vendor</button></div>
+          <div id="vendor-table-wrap" class="vendor-table-wrap"></div>
+        </section>
+
+        <section class="view" id="guests-view" aria-labelledby="guests-title">
+          <div class="page-intro"><div><p class="eyebrow">Guest list</p><h1 id="guests-title">Who's coming,<br /><em>and</em> to what.</h1></div><p class="intro-copy">Track RSVPs, sides, meal preferences, and who needs a room or a ride—searchable in one place.</p></div>
+          <section class="guest-summary" id="guest-summary" aria-label="Guest summary"></section>
+          <div class="decision-toolbar"><div class="filter-tabs" id="guest-filter-tabs"></div><div class="toolbar-right"><input type="search" id="guest-search" class="search-input" placeholder="Search guests…" aria-label="Search guests" /><button class="add-button" id="open-add-guest"><span>+</span> Add guest</button></div></div>
+          <div id="guest-table-wrap" class="guest-table-wrap"></div>
+        </section>
+
+        <section class="view" id="tasks-view" aria-labelledby="tasks-title">
+          <div class="page-intro"><div><p class="eyebrow">Task list</p><h1 id="tasks-title">What needs<br /><em>doing</em> next.</h1></div><p class="intro-copy">Owners, priorities, and due dates for everything in motion. Overdue rises to the top; completed sinks to the bottom.</p></div>
+          <section class="task-summary" id="task-summary" aria-label="Task summary"></section>
+          <div class="decision-toolbar"><div class="filter-tabs" id="task-filter-tabs"></div><button class="add-button" id="open-add-task"><span>+</span> Add task</button></div>
+          <div id="task-table-wrap" class="task-table-wrap"></div>
+        </section>
+
+        <section class="view" id="addons-view" aria-labelledby="addons-title">
+          <div class="page-intro"><div><p class="eyebrow">Add-ons &amp; experiences</p><h1 id="addons-title">The little<br /><em>extras</em> add up.</h1></div><p class="intro-copy">Photo booths, live counters, effects—each is optional, but together they move the budget. Nothing is committed until you approve it.</p></div>
+          <section class="addon-summary" id="addon-summary" aria-label="Add-on summary"></section>
+          <div class="decision-toolbar"><div class="filter-tabs" id="addon-filter-tabs"></div><button class="add-button" id="open-add-addon"><span>+</span> Add an add-on</button></div>
+          <div id="addon-table-wrap" class="addon-table-wrap"></div>
+        </section>
+
+        <section class="view" id="shopping-view" aria-labelledby="shopping-title">
+          <div class="page-intro"><div><p class="eyebrow">Shopping list</p><h1 id="shopping-title">From wishlist<br /><em>to</em> wardrobe.</h1></div><p class="intro-copy">Track outfits, jewellery, and gifts through research to purchase. An item only hits the committed budget once it's bought.</p></div>
+          <div class="decision-toolbar"><div class="filter-tabs" id="shopping-filter-tabs"></div><button class="add-button" id="open-add-shopping"><span>+</span> Add item</button></div>
+          <div id="shopping-table-wrap" class="shop-table-wrap"></div>
+        </section>
+
+        <section class="view" id="payments-view" aria-labelledby="payments-title">
+          <div class="page-intro"><div><p class="eyebrow">Payment ledger</p><h1 id="payments-title">What's paid,<br /><em>what's</em> pending.</h1></div><p class="intro-copy">A payment only counts once it's paid. Marking one paid updates the budget's paid total and the linked vendor—nothing is assumed.</p></div>
+          <section class="pay-summary" id="payment-summary" aria-label="Payment summary"></section>
+          <div class="decision-toolbar"><div class="filter-tabs" id="payment-filter-tabs"></div><button class="add-button" id="open-add-payment"><span>+</span> Add payment</button></div>
+          <div id="payment-table-wrap" class="pay-table-wrap"></div>
         </section>
 
         <section class="view" id="events-view" aria-labelledby="events-title">
           <div class="page-intro"><div><p class="eyebrow">Event plan</p><h1 id="events-title">One wedding,<br /><em>many</em> moving parts.</h1></div><p class="intro-copy">Use events to see what is linked together. Shared costs stay visible as shared—no fake duplication across functions.</p></div>
+          <div class="decision-toolbar"><span class="toolbar-hint">Tap an event to see everything linked to it.</span><button class="add-button" id="open-add-event"><span>+</span> Add event</button></div>
           <section class="event-grid" id="event-grid"></section>
+          <div id="event-detail"></div>
         </section>
 
         <section class="view" id="items-view" aria-labelledby="items-title">
@@ -105,6 +155,145 @@
         <div class="form-grid"><label>Budget allocation<input name="budget" required type="number" min="0" placeholder="50000" /></label><label>Current estimate<input name="forecast" type="number" min="0" placeholder="45000" /></label></div>
         <label>Next action<input name="action" required placeholder="Research three options" /></label>
         <button class="add-button submit-button" value="default">Add to planning inbox <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="vendor-modal">
+      <form method="dialog" id="vendor-form">
+        <div class="modal-heading"><div><p class="eyebrow">Vendor</p><h2 class="vendor-modal-title">Add vendor candidate</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Vendor name<input name="name" required placeholder="e.g. Studio A" /></label>
+        <div class="form-grid"><label>Budget category<select name="category"></select></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label></div>
+        <div class="form-grid"><label>Contact person<input name="contactPerson" placeholder="Name" /></label><label>Phone / WhatsApp<input name="phone" placeholder="+91…" /></label></div>
+        <div class="form-grid"><label>Instagram<input name="instagram" placeholder="handle or URL" /></label><label>Website<input name="website" placeholder="example.com" /></label></div>
+        <div class="form-grid"><label>Location<input name="location" placeholder="City" /></label><label>Initial quote (₹)<input name="quote" type="number" min="0" placeholder="105000" /></label></div>
+        <div class="form-grid"><label>Score (0–10)<input name="score" type="number" min="0" max="10" step="0.1" placeholder="8.5" /></label><label>Priority<select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></label></div>
+        <label>Status<select name="status"></select></label>
+        <button class="add-button submit-button" value="default">Save vendor <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="vendor-decide-modal">
+      <form method="dialog" id="vendor-decide-form">
+        <div class="modal-heading"><div><p class="eyebrow">Decision</p><h2 class="decide-title">Select vendor</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <div class="decide-amounts"><div class="form-grid"><label>Final agreed amount (₹)<input name="finalAmount" type="number" min="0" placeholder="70000" /></label><label>Advance (₹)<input name="advance" type="number" min="0" placeholder="20000" /></label></div></div>
+        <label>Reason<textarea name="reason" rows="3" placeholder="Why this choice?"></textarea></label>
+        <button class="add-button submit-button" value="default">Save decision <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="decision-modal">
+      <form method="dialog" id="decision-form">
+        <div class="modal-heading"><div><p class="eyebrow">Decision</p><h2 class="decision-modal-title">Add decision</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>What needs deciding?<input name="title" required placeholder="e.g. Which caterer?" /></label>
+        <div class="form-grid"><label>Category<input name="category" placeholder="e.g. Catering" /></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label></div>
+        <div class="form-grid"><label>Deadline<input name="deadline" type="date" /></label><label>Status<select name="status"></select></label></div>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <p class="field-note">Add the options you're weighing from the decision's Details view after saving.</p>
+        <button class="add-button submit-button" value="default">Save decision <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="decision-decide-modal">
+      <form method="dialog" id="decision-decide-form">
+        <div class="modal-heading"><div><p class="eyebrow">Make a choice</p><h2>Decide</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Final choice<select name="finalChoice"></select></label>
+        <label>Reason<textarea name="reason" rows="3" placeholder="Why this option?"></textarea></label>
+        <button class="add-button submit-button" value="default">Record decision <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="guest-modal">
+      <form method="dialog" id="guest-form">
+        <div class="modal-heading"><div><p class="eyebrow">Guest</p><h2 class="guest-modal-title">Add guest</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Name<input name="name" required placeholder="e.g. Rohan Mehta or Sharma family" /></label>
+        <div class="form-grid"><label>Family / group<input name="group" placeholder="e.g. College friends" /></label><label>Side<select name="side"></select></label></div>
+        <div class="form-grid"><label>Relationship<input name="relationship" placeholder="e.g. Cousin" /></label><label>Meal<select name="meal"></select></label></div>
+        <div class="form-grid"><label>Phone<input name="phone" placeholder="+91…" /></label><label>Email<input name="email" type="email" placeholder="name@example.com" /></label></div>
+        <label>RSVP<select name="rsvp"></select></label>
+        <div class="field-block"><p class="field-note">Attending</p><div class="checkbox-row" id="guest-events-boxes"></div></div>
+        <div class="checkbox-row"><label class="checkbox-label"><input type="checkbox" name="accommodation" /> <span>Needs accommodation</span></label><label class="checkbox-label"><input type="checkbox" name="transport" /> <span>Needs transport</span></label></div>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save guest <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="event-modal">
+      <form method="dialog" id="event-form">
+        <div class="modal-heading"><div><p class="eyebrow">Event</p><h2 class="event-modal-title">Add event</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Event name<input name="name" required placeholder="e.g. Mehendi" /></label>
+        <p class="event-rename-note field-note">Renaming won't move already-linked items—they keep the old event label.</p>
+        <div class="form-grid"><label>Date<input name="date" placeholder="17 Dec 2026" /></label><label>Venue<input name="venue" placeholder="Venue name" /></label></div>
+        <div class="form-grid"><label>Start time<input name="startTime" type="time" /></label><label>End time<input name="endTime" type="time" /></label></div>
+        <div class="form-grid"><label>Guest count<input name="guestCount" type="number" min="0" placeholder="250" /></label><label>Allocated (₹)<input name="budget" type="number" min="0" placeholder="165000" /></label></div>
+        <label>Forecast (₹)<input name="forecast" type="number" min="0" placeholder="139000" /></label>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save event <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="task-modal">
+      <form method="dialog" id="task-form">
+        <div class="modal-heading"><div><p class="eyebrow">Task</p><h2 class="task-modal-title">Add task</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Task<input name="name" required placeholder="e.g. Finalize photography timeline" /></label>
+        <label>Description<input name="description" placeholder="Optional detail" /></label>
+        <div class="form-grid"><label>Owner<input name="owner" placeholder="Who's on it?" /></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label></div>
+        <div class="form-grid"><label>Priority<select name="priority"></select></label><label>Status<select name="status"></select></label></div>
+        <label>Related to<select name="linkRef"></select></label>
+        <div class="form-grid"><label>Due date<input name="dueDate" type="date" /></label><label>Reminder date<input name="reminderDate" type="date" /></label></div>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save task <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="addon-modal">
+      <form method="dialog" id="addon-form">
+        <div class="modal-heading"><div><p class="eyebrow">Add-on</p><h2 class="addon-modal-title">Add an add-on</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Name<input name="name" required placeholder="e.g. Live paan counter" /></label>
+        <div class="form-grid"><label>Type<select name="category"></select></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label></div>
+        <div class="form-grid"><label>Budget category<select name="budgetCategory"></select></label><label>Vendor (optional)<select name="vendorId"></select></label></div>
+        <div class="form-grid"><label>Estimated (₹)<input name="estimated" type="number" min="0" placeholder="15000" /></label><label>Quoted (₹)<input name="quoted" type="number" min="0" placeholder="0" /></label></div>
+        <div class="form-grid"><label>Negotiated (₹)<input name="negotiated" type="number" min="0" placeholder="0" /></label><label>Priority<select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select></label></div>
+        <label>Status<select name="status"></select></label>
+        <label>Description<input name="description" placeholder="What is it?" /></label>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save add-on <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="addon-decide-modal">
+      <form method="dialog" id="addon-decide-form">
+        <div class="modal-heading"><div><p class="eyebrow">Decision</p><h2 class="addon-decide-title">Approve add-on</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <div class="addon-decide-amounts"><label>Final cost (₹)<input name="finalCost" type="number" min="0" placeholder="20000" /></label></div>
+        <label>Reason<textarea name="reason" rows="3" placeholder="Why this choice?"></textarea></label>
+        <button class="add-button submit-button" value="default">Save decision <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="shopping-modal">
+      <form method="dialog" id="shopping-form">
+        <div class="modal-heading"><div><p class="eyebrow">Shopping item</p><h2 class="shopping-modal-title">Add shopping item</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Item name<input name="name" required placeholder="e.g. Reception sherwani" /></label>
+        <div class="form-grid"><label>Person<select name="person"></select></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label></div>
+        <label>Budget category<select name="category"></select></label>
+        <div class="form-grid"><label>Shop name<input name="shopName" placeholder="Store / boutique" /></label><label>Shop contact<input name="shopContact" placeholder="Phone" /></label></div>
+        <div class="form-grid"><label>Instagram<input name="instagram" placeholder="handle" /></label><label>Website<input name="website" placeholder="example.com" /></label></div>
+        <div class="form-grid"><label>Budget (₹)<input name="budget" type="number" min="0" placeholder="60000" /></label><label>Quoted (₹)<input name="quoted" type="number" min="0" placeholder="52000" /></label></div>
+        <div class="form-grid"><label>Actual price (₹)<input name="actualPrice" type="number" min="0" placeholder="Set on purchase" /></label><label>Size<input name="size" placeholder="M / 40" /></label></div>
+        <div class="form-grid"><label>Trial date<input name="trialDate" type="date" /></label><label>Delivery date<input name="deliveryDate" type="date" /></label></div>
+        <label>Status<select name="status"></select></label>
+        <label class="checkbox-label"><input type="checkbox" name="alteration" /> <span>Needs alteration</span></label>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save item <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="shopping-purchase-modal">
+      <form method="dialog" id="shopping-purchase-form">
+        <div class="modal-heading"><div><p class="eyebrow">Purchase</p><h2>Mark as purchased</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <div class="form-grid"><label>Actual price (₹)<input name="actualPrice" type="number" min="0" placeholder="52000" /></label><label>Purchase date<input name="purchaseDate" type="date" /></label></div>
+        <button class="add-button submit-button" value="default">Confirm purchase <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="payment-modal">
+      <form method="dialog" id="payment-form">
+        <div class="modal-heading"><div><p class="eyebrow">Payment</p><h2 class="payment-modal-title">Add payment</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Description<input name="description" required placeholder="e.g. Photography advance" /></label>
+        <div class="form-grid"><label>Vendor (optional)<select name="vendorId"></select></label><label>Budget category<select name="category"></select></label></div>
+        <div class="form-grid"><label>Amount (₹)<input name="amount" required type="number" min="0" placeholder="20000" /></label><label>Due date<input name="dueDate" type="date" /></label></div>
+        <div class="form-grid"><label>Method<select name="method"></select></label><label>Reference<input name="reference" placeholder="Txn / cheque no." /></label></div>
+        <div class="form-grid"><label>Status<select name="status"></select></label><label>Paid so far (₹)<input name="paidAmount" type="number" min="0" placeholder="For partial payments" /></label></div>
+        <label>Paid date<input name="paidDate" type="date" /></label>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save payment <span>→</span></button>
       </form>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

@@ -1,4 +1,4 @@
-# Vaibhav — Wedding Planning MVP
+# AbhiSanu — Wedding Planning MVP
 
 A private, budget-first wedding planning tool for the decision-making stage. It deliberately distinguishes forecasts from commitments and payments, so candidates do not silently become booked expenses.
 
@@ -6,8 +6,18 @@ A private, budget-first wedding planning tool for the decision-making stage. It 
 
 - Budget-first dashboard with allocated, forecast, committed, and paid totals
 - Category-level budget health and uncertain cost exposure
-- Decision inbox with candidates and deliberate decision state
-- Event plan for Haldi, Sangeet, Wedding, and Reception
+- Decision center: options with price/score/pros/cons, deliberate lifecycle, recorded final choice, live dashboard reactivity
+- Vendor candidates with lifecycle, per-category comparison, quote history, and select/reject reasons
+- Selecting a vendor adds its agreed amount to the committed budget (reversible), never to paid
+- Payment ledger with statuses, due/overdue tracking, and a paid/outstanding/upcoming summary
+- Marking a payment paid adds its amount to the budget's paid total and the linked vendor (reversible)
+- Shopping pipeline (by person) for outfits, jewellery, and gifts with a research→purchase lifecycle
+- Purchasing a shopping item adds its actual price to the committed budget (reversible)
+- Add-ons / experiences (food counters, booths, effects) with a running "what the extras add up to" total
+- Approving an add-on adds its final cost to the committed budget (reversible)
+- Task list with owners, priorities, due/overdue tracking, checkbox complete, and links to any entity
+- Event plan (add/edit/delete) that shows everything linked to each function, derived live across modules
+- Guest list with RSVP tracking, sides, per-event attendance, meal/stay/travel needs, and search
 - Planning-library view for vendors, shopping, and add-ons
 - Add a planning item; it appears in the budget, library, and decision inbox
 - Browser-local persistence, with optional Firestore sync across browsers
