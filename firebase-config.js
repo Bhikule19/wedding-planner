@@ -9,6 +9,5 @@ export const firebaseConfig = {
   appId: "1:1031021810131:web:d9683655d2ade0a0f09f26",
   measurementId: "G-RTMQTKZ3KZ"
 };
-// Set this to the only Google account allowed to access your wedding plan.
-export const allowedEmail = 'abhishekbhikule76@gmail.com';
+// Access is open to any signed-in Google account (see firestore.rules). No email allowlist.
 export const planDocumentId = 'wedding-planner-30231';

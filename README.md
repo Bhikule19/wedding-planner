@@ -42,11 +42,11 @@ For automatic cross-browser consistency, configure the included Firestore integr
 
 1. Create a Firebase project and register a Web app.
 2. Enable **Authentication → Google** and create **Cloud Firestore** in production mode.
-3. Paste the Web app configuration object into `firebase-config.js` and replace `allowedEmail` with your Google email.
-4. Replace the same placeholder email in `firestore.rules`, then publish those rules in the Firebase console.
+3. Paste the Web app configuration object into `firebase-config.js`.
+4. Publish `firestore.rules` in the Firebase console (Firestore → Rules).
 5. In Firebase Authentication settings, add your deployed domain to Authorized domains.
 
-The Google sign-in is deliberate. A client-only Firestore app with no authentication would require public rules, meaning anyone who discovers the app could read or overwrite your wedding data. This setup permits only your Google account. The current data is text-only and stored in a single Firestore document; photos and attachments require Firebase Storage in a later phase.
+**Access model:** sign-in is open to **any Google account** (`firestore.rules` allows any authenticated user). Anyone who has the app URL and signs in with Google can read and write the shared plan — including budgets, vendor contacts, payments, and the guest list. This is a deliberate choice for easy shared access; keep the URL private. To restrict access later, change `firestore.rules` to check specific `request.auth.token.email` values and re-publish. Data is text-only in a single Firestore document; file uploads require Firebase Storage in a later phase.
 
 ## Hosting
 

@@ -1,7 +1,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import { GoogleAuthProvider, getAuth, getRedirectResult, onAuthStateChanged, signInWithRedirect, signOut } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import { doc, getDoc, getFirestore, setDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
-import { firebaseConfig, allowedEmail, planDocumentId } from './firebase-config.js';
+import { firebaseConfig, planDocumentId } from './firebase-config.js';
 import { compact, formatDate } from './format.js';
 import { createVendors, VENDOR_SEED } from './vendors.js';
 import { createPayments, PAYMENT_SEED } from './payments.js';
@@ -214,11 +214,6 @@ function initializeCloud() {
   });
   onAuthStateChanged(auth, async signedInUser => {
     user = signedInUser;
-    if (user && allowedEmail !== 'YOUR_GOOGLE_EMAIL@example.com' && user.email !== allowedEmail) {
-      toast(`This plan is restricted to ${allowedEmail}.`);
-      await signOut(auth);
-      return;
-    }
     if (user) {
       try {
         const snapshot = await getDoc(doc(db, 'weddings', planDocumentId));

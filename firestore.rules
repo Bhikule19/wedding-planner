@@ -1,12 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwner() {
-      return request.auth != null
-        && request.auth.token.email == 'abhishekbhikule76@gmail.com';
-    }
+    // Open to any signed-in Google account (deliberate: shared access without an allowlist).
+    // Anyone who has the app URL and signs in with Google can read and write the plan.
     match /weddings/{planId} {
-      allow read, write: if isOwner();
+      allow read, write: if request.auth != null;
     }
   }
 }
