@@ -13,9 +13,9 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <a class="brand" href="#budget" aria-label="Vaibhav wedding planning home">
-          <span class="brand-mark">V</span>
-          <span><strong>Abhishek-Sanika</strong><small>wedding planning</small></span>
+        <a class="brand" href="#budget" aria-label="Wedding planning home">
+          <span class="brand-mark" id="brand-mark">A</span>
+          <span><strong id="brand-name">Abhishek-Sanika</strong><small>wedding planning</small></span>
         </a>
 
         <nav aria-label="Primary navigation">
@@ -32,20 +32,22 @@
           <p class="nav-label secondary">Finance</p>
           <a class="nav-link" href="#payments" data-view="payments"><span>09</span> Payments</a>
           <p class="nav-label secondary">Library</p>
-          <a class="nav-link muted" href="#items" data-view="items"><span>10</span> Planning items</a>
-          <a class="nav-link muted" href="#notes" data-view="notes"><span>11</span> Notes &amp; ideas</a>
+          <a class="nav-link muted" href="#ideas" data-view="ideas"><span>10</span> Ideas &amp; wishlist</a>
+          <p class="nav-label secondary">Files</p>
+          <a class="nav-link muted" href="#documents" data-view="documents"><span>11</span> Documents</a>
+          <a class="nav-link muted" href="#settings" data-view="settings"><span>12</span> Settings</a>
         </nav>
 
         <div class="sidebar-footer">
-          <div class="date-block"><span>COUNTDOWN</span><strong>112 days</strong><small>18 December 2026</small></div>
-          <button class="text-button" id="reset-data">Reset demo data</button>
+          <div class="date-block"><span>COUNTDOWN</span><strong id="countdown-days">112 days</strong><small id="countdown-date">18 December 2026</small></div>
         </div>
       </aside>
 
       <main>
         <header class="topbar">
-          <div class="crumb"><span id="view-kicker">MASTER PLAN</span><span class="dot">•</span><span>August 2026</span></div>
-          <div class="topbar-actions"><button class="sync-status offline" id="auth-button" type="button"><span></span> Set up sync</button><button class="add-button" id="open-add-modal"><span>+</span> Add planning item</button></div>
+          <div class="crumb"><span id="view-kicker">MASTER PLAN</span><span class="dot">•</span><span id="crumb-now">August 2026</span></div>
+          <div class="search-wrap" id="search-wrap"><input type="search" id="global-search" class="global-search" placeholder="Search everything…" aria-label="Search everything" autocomplete="off" /><div class="search-results" id="search-results" role="listbox" hidden></div></div>
+          <div class="topbar-actions"><button class="sync-status offline" id="auth-button" type="button"><span></span> Set up sync</button><button class="add-button" id="open-capture-idea"><span>+</span> Capture idea</button></div>
         </header>
 
         <section class="view active" id="budget-view" aria-labelledby="budget-title">
@@ -67,7 +69,11 @@
             <button class="underlined-button" data-go="decisions">Review decisions <span>→</span></button>
           </section>
 
-          <div class="section-heading"><div><p class="eyebrow">Category health</p><h2>Where the plan stands</h2></div><button class="icon-button" aria-label="Filter categories">⌘</button></div>
+          <div class="section-heading"><div><p class="eyebrow">At a glance</p><h2>Across the whole plan</h2></div></div>
+          <section class="pulse-grid" id="dashboard-pulse" aria-label="Module summaries"></section>
+
+          <div class="section-heading"><div><p class="eyebrow">Category health</p><h2>Where the plan stands</h2></div><button class="add-button" id="open-add-category"><span>+</span> Add category</button></div>
+          <p class="grid-hint">Tap a category to edit its allocation. Committed and paid update automatically from vendors, shopping, add-ons, and payments.</p>
           <section class="category-grid" id="category-grid" aria-label="Budget category breakdown"></section>
 
           <section class="lower-grid">
@@ -78,11 +84,14 @@
             <div class="panel reserve-panel">
               <p class="eyebrow">Protect the plan</p><h2>Keep a reserve.</h2>
               <div class="reserve-figure"><strong id="reserve-total">₹1.20L</strong><span>contingency</span></div>
-              <p>10% is ring-fenced for changes, missed costs, and the inevitable last-minute request.</p>
+              <p>Ring-fenced for changes, missed costs, and the inevitable last-minute request.</p>
               <div class="reserve-bar"><span></span></div>
-              <small>Do not use this to make an over-budget choice look affordable.</small>
+              <button class="text-button" id="edit-reserve">Adjust reserve</button>
             </div>
           </section>
+
+          <div class="section-heading"><div><p class="eyebrow">Coming up</p><h2>Next on the calendar</h2></div></div>
+          <section class="panel upcoming-panel"><div id="upcoming-list" class="upcoming-list"></div></section>
         </section>
 
         <section class="view" id="decisions-view" aria-labelledby="decisions-title">
@@ -138,23 +147,48 @@
           <div id="event-detail"></div>
         </section>
 
-        <section class="view" id="items-view" aria-labelledby="items-title">
-          <div class="page-intro"><div><p class="eyebrow">Research library</p><h1 id="items-title">Everything still<br /><em>in play.</em></h1></div><p class="intro-copy">Candidates remain options until selected. Keep research, quotations, and ideas in one honest pipeline.</p></div>
-          <div class="item-table-wrap"><table><thead><tr><th>Planning need</th><th>Event</th><th>Stage</th><th>Best current cost</th><th>Next action</th></tr></thead><tbody id="item-table"></tbody></table></div>
+        <section class="view" id="ideas-view" aria-labelledby="ideas-title">
+          <div class="page-intro"><div><p class="eyebrow">Ideas &amp; wishlist</p><h1 id="ideas-title">A place for the<br /><em>not-yet.</em></h1></div><p class="intro-copy">Capture loose ideas here, then convert one into a vendor, shopping item, add-on, task, or decision when it deserves real research.</p></div>
+          <div class="decision-toolbar"><span class="toolbar-hint">Capture now, convert when it's ready.</span><button class="add-button" id="open-capture-idea-2"><span>+</span> Add idea</button></div>
+          <div class="idea-list" id="idea-list"></div>
         </section>
 
-        <section class="view empty-view" id="notes-view" aria-labelledby="notes-title"><p class="eyebrow">Notes &amp; ideas</p><h1 id="notes-title">A place for the<br /><em>not-yet.</em></h1><p>Capture loose ideas here, then turn one into a planning item when it deserves research.</p><button class="add-button" id="open-idea-modal"><span>+</span> Capture an idea</button></section>
+        <section class="view" id="documents-view" aria-labelledby="documents-title">
+          <div class="page-intro"><div><p class="eyebrow">Documents</p><h1 id="documents-title">Every paper,<br /><em>one</em> place.</h1></div><p class="intro-copy">Keep links to quotations, contracts, and receipts tagged to the right vendor or payment. File uploads come in a later phase—for now, paste a Drive or Dropbox link.</p></div>
+          <div class="decision-toolbar"><div class="filter-tabs" id="document-filter-tabs"></div><button class="add-button" id="open-add-document"><span>+</span> Add document</button></div>
+          <div id="document-table-wrap" class="doc-table-wrap"></div>
+        </section>
+
+        <section class="view" id="settings-view" aria-labelledby="settings-title">
+          <div class="page-intro"><div><p class="eyebrow">Settings</p><h1 id="settings-title">The <em>essentials</em>.</h1></div><p class="intro-copy">Your wedding details drive the app; a backup keeps your entries safe before any big change.</p></div>
+          <div class="settings-grid">
+            <form method="dialog" id="settings-form" class="panel settings-panel">
+              <p class="eyebrow">Wedding details</p>
+              <label>Couple names<input name="coupleNames" placeholder="e.g. Abhishek &amp; Sanika" /></label>
+              <label>Wedding date<input name="weddingDate" type="date" /></label>
+              <button class="add-button submit-button" value="default">Save details <span>→</span></button>
+            </form>
+            <div class="panel settings-panel">
+              <p class="eyebrow">Your data</p>
+              <p class="settings-note">Everything is stored in this browser, and in Firestore once you sign in. Export a backup before importing or resetting.</p>
+              <div class="settings-actions">
+                <button type="button" class="add-button" id="export-data"><span>↓</span> Export backup (JSON)</button>
+                <label class="import-label" for="import-data">Import a backup…<input type="file" id="import-data" accept="application/json,.json" hidden /></label>
+                <button type="button" class="text-button danger" id="reset-demo">Reset to demo data</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
 
-    <dialog id="item-modal">
-      <form method="dialog" id="item-form">
-        <div class="modal-heading"><div><p class="eyebrow">New planning item</p><h2>Put it in the plan.</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
-        <label>What needs a decision?<input name="name" required placeholder="e.g. Reception photo booth" /></label>
-        <div class="form-grid"><label>Type<select name="type"><option>Vendor</option><option>Shopping</option><option>Add-on</option><option>Idea</option></select></label><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option>Shared</option></select></label></div>
-        <div class="form-grid"><label>Budget allocation<input name="budget" required type="number" min="0" placeholder="50000" /></label><label>Current estimate<input name="forecast" type="number" min="0" placeholder="45000" /></label></div>
-        <label>Next action<input name="action" required placeholder="Research three options" /></label>
-        <button class="add-button submit-button" value="default">Add to planning inbox <span>→</span></button>
+    <dialog id="idea-modal">
+      <form method="dialog" id="idea-form">
+        <div class="modal-heading"><div><p class="eyebrow">Idea</p><h2 class="idea-modal-title">Capture an idea</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Idea<input name="title" required placeholder="e.g. Live paan counter" /></label>
+        <div class="form-grid"><label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label><label>Rough estimate (₹)<input name="estimate" type="number" min="0" placeholder="15000" /></label></div>
+        <label>Note<textarea name="note" rows="2" placeholder="Optional detail"></textarea></label>
+        <button class="add-button submit-button" value="default">Save idea <span>→</span></button>
       </form>
     </dialog>
     <dialog id="vendor-modal">
@@ -195,6 +229,27 @@
         <label>Final choice<select name="finalChoice"></select></label>
         <label>Reason<textarea name="reason" rows="3" placeholder="Why this option?"></textarea></label>
         <button class="add-button submit-button" value="default">Record decision <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog id="budget-modal">
+      <form method="dialog" id="budget-form">
+        <div class="modal-heading"><div><p class="eyebrow">Budget category</p><h2 class="budget-modal-title">Add category</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Category name<input name="name" required placeholder="e.g. Honeymoon" /></label>
+        <div class="form-grid"><label>Allocated (₹)<input name="budget" required type="number" min="0" placeholder="100000" /></label><label>Forecast (₹)<input name="forecast" type="number" min="0" placeholder="90000" /></label></div>
+        <label>Event<select name="event"><option>Wedding</option><option>Reception</option><option>Sangeet</option><option>Haldi</option><option selected>Shared</option></select></label>
+        <p class="budget-committed-note field-note"></p>
+        <p class="budget-rename-note field-note">Renaming updates all vendors, shopping, add-ons, and payments linked to this category.</p>
+        <div class="modal-actions"><button type="button" class="text-button danger" id="delete-category" hidden>Delete category</button><button class="add-button submit-button" value="default">Save category <span>→</span></button></div>
+      </form>
+    </dialog>
+    <dialog id="document-modal">
+      <form method="dialog" id="document-form">
+        <div class="modal-heading"><div><p class="eyebrow">Document</p><h2 class="document-modal-title">Add document</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+        <label>Title<input name="title" required placeholder="e.g. Studio A quotation" /></label>
+        <label>Link (Drive, Dropbox, URL)<input name="url" placeholder="https://… (optional for now)" /></label>
+        <div class="form-grid"><label>Type<select name="kind"></select></label><label>Linked to<select name="linkRef"></select></label></div>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Optional"></textarea></label>
+        <button class="add-button submit-button" value="default">Save document <span>→</span></button>
       </form>
     </dialog>
     <dialog id="guest-modal">

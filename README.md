@@ -18,8 +18,12 @@ A private, budget-first wedding planning tool for the decision-making stage. It 
 - Task list with owners, priorities, due/overdue tracking, checkbox complete, and links to any entity
 - Event plan (add/edit/delete) that shows everything linked to each function, derived live across modules
 - Guest list with RSVP tracking, sides, per-event attendance, meal/stay/travel needs, and search
-- Planning-library view for vendors, shopping, and add-ons
-- Add a planning item; it appears in the budget, library, and decision inbox
+- Editable budget: add/edit/delete categories with cascading rename across linked records
+- Dashboard "at a glance" tiles for every module plus a cross-module "Coming up" calendar
+- Ideas/wishlist capture that converts into a vendor, shopping item, add-on, task, or decision
+- Global search across every entity from the top bar
+- Documents registry (links now; Firebase Storage uploads planned) tagged to any entity
+- Settings for wedding details (drive the app chrome) plus JSON backup export / import / reset
 - Browser-local persistence, with optional Firestore sync across browsers
 
 ## Run locally

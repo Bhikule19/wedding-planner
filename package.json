@@ -5,6 +5,6 @@
   "private": true,
   "description": "A budget-first, private wedding planning MVP.",
   "scripts": {
-    "check": "node --check app.js && node --check vendors.js && node --check payments.js && node --check shopping.js && node --check addons.js && node --check tasks.js && node --check events.js && node --check decisions.js && node --check guests.js && node --check format.js"
+    "check": "node --check addons.js && node --check app.js && node --check decisions.js && node --check documents.js && node --check events.js && node --check format.js && node --check guests.js && node --check ideas.js && node --check payments.js && node --check search.js && node --check settings.js && node --check shopping.js && node --check tasks.js && node --check vendors.js"
   }
 }
